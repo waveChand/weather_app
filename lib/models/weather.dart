@@ -6,6 +6,8 @@ class Weather {
   final double latitude;
   final double longitude;
   final DateTime localTime;
+  final int humidity;
+  final double windKph;
   final double temperatureC;
   final String conditionText;
   final String conditionIconUrl;
@@ -18,6 +20,8 @@ class Weather {
     required this.longitude,
     required this.localTime,
     required this.temperatureC,
+    required this.humidity,
+    required this.windKph,
     required this.conditionText,
     required this.conditionIconUrl,
     this.forecast,
@@ -36,6 +40,8 @@ class Weather {
       longitude: location['lon'].toDouble(),
       localTime: DateTime.parse(location['localtime']),
       temperatureC: current['temp_c'].toDouble(),
+      humidity: current['humidity'],
+      windKph: current['wind_kph'].toDouble(),
       conditionText: condition['text'],
       conditionIconUrl: condition['icon'],
       forecast: json['forecast'] != null
