@@ -1,13 +1,16 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:weather_app/services/weather_service.dart';
+import 'package:weather_app/models/weather.dart';
 
 class WeatherProvider extends ChangeNotifier {
   final WeatherService _service;
+  final List<Weather> _cities = [];
   bool _isLoading = false;
   String? _error;
 
   // Public getters
+  List<Weather> get cities => List.unmodifiable(_cities);
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -44,4 +47,12 @@ class WeatherProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> refreshAll() async {}
+
+  Future<void> removeCity(int index) async {}
+
+  Future<void> addCity(String city) async {}
+
+  Future<void> loadSavedCities() async {}
 }

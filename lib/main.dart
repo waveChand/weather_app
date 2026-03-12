@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/services/weather_service.dart';
 import 'package:weather_app/providers/weather_provider.dart';
-
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const WeatherApp());
@@ -13,59 +13,56 @@ class WeatherApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<WeatherProvider>(
-      
+    return ChangeNotifierProvider(
       create: (_) {
-        final service = WeatherService(apiKey: "4308d2b6995346e993f21305261003");
+        final service = WeatherService(
+          apiKey: '4308d2b6995346e993f21305261003',
+        );
         final provider = WeatherProvider(service: service);
+        provider.loadSavedCities();
         return provider;
       },
       child: MaterialApp(
         title: 'Weather App',
-        home: const WeatherScreen(),
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
+          cardTheme: CardThemeData(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          appBarTheme: const AppBarTheme(
+            centerTitle: true,
+            elevation: 0,
+          ),
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+          cardTheme: CardThemeData(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          appBarTheme: const AppBarTheme(
+            centerTitle: true,
+            elevation: 0,
+          ),
+        ),
+        home: const HomeScreen(),
       ),
     );
   }
+
 }
 
-class WeatherScreen extends StatefulWidget {
-  const WeatherScreen({super.key});
-
-  @override
-  State<WeatherScreen> createState() => _WeatherScreenState();
-}
-
-class _WeatherScreenState extends State<WeatherScreen> {
-
-@override
-  void initState() {
-    // Fetch weather data when the screen is initialized
-    super.initState();
-    _loadWeather();
-  }
-
-  Future<void> _loadWeather() async {
-    final provider = Provider.of<WeatherProvider>(context, listen: false);
-    await provider.fetchWeather('Colombo'); 
-    await provider.fetchForecast('Colombo');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Weather App')),
-      body: Consumer<WeatherProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (provider.error != null) {
-            return Center(child: Text('Error: ${provider.error}'));
-          } else {
-            return Center(child: Text('Weather data will be displayed here'));
-          }
-        },
-      ),
-    );
-  }
-}
