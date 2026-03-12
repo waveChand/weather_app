@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:weather_app/services/weather_service.dart';
 import 'package:weather_app/models/weather.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherProvider extends ChangeNotifier {
   final WeatherService _service;
@@ -48,11 +49,61 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> refreshAll() async {}
+  Future<void> refreshAll() async {
+
+    if (_cities.isEmpty) return;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    final cityNames = _cities.map((w) => w.cityName).toList();
+    _cities.clear();
+    for (final name in cityNames) {
+      try {
+        final weather = await _service.fetchCurrentWeather(name);
+        _cities.add(weather);
+      } catch (e) {
+        // Skip cities that fail during refresh
+      }
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
 
   Future<void> removeCity(int index) async {}
 
-  Future<void> addCity(String city) async {}
+  Future<void> addCity(String city) async {
+    final normalizedName = city.trim().toLowerCase();
+    if (normalizedName.isEmpty) {
+      throw WeatherApiException('City name cannot be empty');
+    }
+    final alreadyExists = _cities.any(
+      (w) => w.cityName.toLowerCase() == normalizedName,
+    );
+    if (alreadyExists) {
+      throw WeatherApiException('$city is already in your list');
+    }
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final weather = await _service.fetchCurrentWeather(city);
+      _cities.add(weather);
+      await _saveCities();
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
 
   Future<void> loadSavedCities() async {}
+
+  Future<void> _saveCities() async {
+    final prefs = await SharedPreferences.getInstance();
+    final names = _cities.map((w) => w.cityName).toList();
+    await prefs.setStringList('saved_cities', names);
+  }
 }
