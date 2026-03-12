@@ -69,7 +69,12 @@ class WeatherProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> removeCity(int index) async {}
+  Future<void> removeCity(int index) async {
+    if (index < 0 || index >= _cities.length) return;
+    _cities.removeAt(index);
+    await _saveCities();
+    notifyListeners();
+  }
 
   Future<void> addCity(String city) async {
     final normalizedName = city.trim().toLowerCase();
