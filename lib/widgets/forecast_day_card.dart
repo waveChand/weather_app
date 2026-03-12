@@ -38,7 +38,7 @@ class ForecastDayCard extends StatelessWidget {
               day.conditionIconUrl,
               width: 80,
               height: 80,
-              errorBuilder: (_, __, ___) =>
+              errorBuilder: (_, _, _) =>
                   Icon(Icons.cloud, size: 80, color: colors.outline),
             ),
 
