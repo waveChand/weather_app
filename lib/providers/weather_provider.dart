@@ -99,11 +99,38 @@ class WeatherProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadSavedCities() async {}
+  Future<void> loadSavedCities() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedCities = prefs.getStringList('saved_cities') ?? [];
+    if (savedCities.isEmpty) return;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    for (final city in savedCities) {
+      try {
+        final weather = await _service.fetchCurrentWeather(city);
+        _cities.add(weather);
+      } catch (e) {
+        print('Failed to load $city: $e');
+      }
+  }
+    _isLoading = false;
+    notifyListeners();
+  }
 
   Future<void> _saveCities() async {
     final prefs = await SharedPreferences.getInstance();
     final names = _cities.map((w) => w.cityName).toList();
     await prefs.setStringList('saved_cities', names);
+  }
+
+  Future<Weather> getForecast(String cityName) async {
+    try {
+      return await _service.fetchForecast(cityName);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
   }
 }
